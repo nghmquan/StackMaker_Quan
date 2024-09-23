@@ -1,122 +1,98 @@
 ﻿using UnityEngine;
-using UnityEngine.Playables;
 
 public class Player : MonoBehaviour
 {
-    private Vector2 startTouchPosition, endTouchPosition;
-    public float minSwipeDistance = 50f; // Minimum distance for a swipe
-    public float moveDistance = 1f; // Distance the player moves on swipe
+    [SerializeField] private float threshHold = 0.1f;
+    [SerializeField] private float distancePlayer;
+    private Vector3 startPosition, endPosition;
+    private Direction direction;
 
-    void Update()
+    private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        GetMouseInput();
+    }
+
+    private void GetMouseInput()
+    {
+        if (Input.GetMouseButton(0))
         {
-            startTouchPosition = Input.mousePosition;
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            endTouchPosition = Input.mousePosition;
-            DetectSwipe();
+            if (Input.GetMouseButtonDown(0))
+            {
+                startPosition = Input.mousePosition;
+            }
+
+            endPosition = Input.mousePosition;
         }
 
-        // Handle touch input for mobile devices
-        if (Input.touchCount > 0)
+        if (Input.GetMouseButtonUp(0))
         {
-            Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began)
+            if(GetDirection() != Vector3.zero)
             {
-                startTouchPosition = touch.position;
-            }
-            else if (touch.phase == TouchPhase.Ended)
-            {
-                endTouchPosition = touch.position;
-                DetectSwipe();
+                Move(direction,endPosition);
             }
         }
     }
 
-    void DetectSwipe()
+    private Vector3 GetDirection()
     {
-        Vector2 swipeDelta = endTouchPosition - startTouchPosition;
-
-        if (swipeDelta.magnitude >= minSwipeDistance)
+        if(Mathf.Abs(endPosition.x - startPosition.x)> Mathf.Abs(endPosition.y - startPosition.y))
         {
-            if (Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y))
+            if(Mathf.Abs(endPosition.x - startPosition.x) > threshHold)
             {
-                // Horizontal swipe
-                if (swipeDelta.x > 0)
-                    Move(Direction.RIGHT);
-                else
-                    Move(Direction.LEFT);
-            }
-            else
+                if(endPosition.x > startPosition.x)
+                {
+                    direction = Direction.RIGHT;
+                    SetDirection(direction);
+                }else if(endPosition.x < startPosition.x)
+                {
+                    direction = Direction.LEFT;
+                    SetDirection(direction);
+                }
+            }else if(Mathf.Abs(endPosition.x - startPosition.x) < Mathf.Abs(endPosition.y - startPosition.y))
             {
-                // Vertical swipe
-                if (swipeDelta.y > 0)
-                    Move(Direction.FORWARD);
-                else
-                    Move(Direction.BACK);
+                if(Mathf.Abs(endPosition.y - startPosition.y) > threshHold)
+                {
+                    if(endPosition.y > startPosition.y)
+                    {
+                        direction = Direction.FORWARD;
+                        SetDirection(direction);
+                    }
+                    else if(endPosition.y < startPosition.y)
+                    {
+                        direction = Direction.BACK;
+                        SetDirection(direction);
+                    }
+                }
             }
         }
+
+        return Vector3.zero;
     }
 
-    void Move(Direction _direction)
+    private void SetDirection(Direction _direction)
     {
-
-        Vector3 _endPosition = transform.position;
-
         switch (_direction)
         {
             case Direction.FORWARD:
-                _endPosition += Vector3.forward * moveDistance;
+                transform.position = Vector3.forward;
                 break;
             case Direction.BACK:
-                _endPosition += Vector3.back * moveDistance;
+                transform.position = Vector3.back;
                 break;
             case Direction.LEFT:
-                _endPosition += Vector3.left * moveDistance;
+                transform.position = Vector3.left;
                 break;
             case Direction.RIGHT:
-                _endPosition += Vector3.right * moveDistance;
+                transform.position = Vector3.right;
                 break;
         }
-        var collider = Collided(_endPosition);
-        if(collider != null)
-        {
-            Move(_direction, collider.transform.position);
-        }
-        // Call Move function with direction and end position
-        
+        Move(_direction, endPosition);
     }
 
-    void Move(Direction _direction, Vector3 _endPosition)
+    private void Move(Direction _direction, Vector3 _endPosition)
     {
-        // Perform the actual movement logic, such as animation or position update
-        transform.position = _endPosition;
-        Debug.Log("Moved " + _direction + " to position " + _endPosition);
-        Move(_direction);
-    }
-    Collider Collided(Vector3 _endPostion)
-    {
-        var direction = _endPostion - transform.position;
-        direction = direction.normalized + Vector3.down * .5f;
-        Debug.Log(direction);
-        Physics.Raycast(transform.position, direction, out var hitInfo);
-        var collider = hitInfo.collider;
-        if(collider != null)
-        {
-            Debug.Log("Collider is not null: " + collider.name);
-        }
-        else
-        {
-            Debug.Log("Collider is null");
-        }
-        Debug.DrawRay(transform.position, direction, Color.red, 5);
-        return collider;
-    }
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawRay(transform.position, Vector3.forward);
+        transform.position = Vector3.MoveTowards(transform.position, _endPosition, distancePlayer * Time.deltaTime);
+        Debug.Log($"Moving {_direction} to {_endPosition}");
     }
 }
 
