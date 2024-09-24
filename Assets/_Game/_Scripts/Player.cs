@@ -1,105 +1,114 @@
 ﻿using UnityEngine;
 
+public enum Direction // Declare enum constants to identify movement directions
+{
+    NONE, FORWARD, BACK, RIGHT, LEFT
+};
+
 public class Player : MonoBehaviour
 {
-    [SerializeField] private float threshHold = 0.1f;
-    [SerializeField] private float distancePlayer;
-    private Vector3 startPosition, endPosition;
-    private Direction direction;
+    [SerializeField] private float moveSpeed = 10f; // Variable for speed object
+    [SerializeField] private LayerMask brickLayer;
 
-    private void Update()
-    {
-        GetMouseInput();
-    }
+    private Vector3 firstMouseClick, endMouseClick; // Variable for first mouse click and end mouse click
+    private Vector3 targetPosition;
 
-    private void GetMouseInput()
+    private Direction swipeDirection;
+
+    private bool isMoving = false;
+
+    void Update()
     {
-        if (Input.GetMouseButton(0))
+
+        //RaycastHit hit;
+        //if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity, brickLayer))
+        //{
+        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
+        //    Debug.Log("Did Hit");
+        //}
+
+        // If player when click left mouse mdown
+        if (Input.GetMouseButtonDown(0))
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                startPosition = Input.mousePosition;
-            }
-
-            endPosition = Input.mousePosition;
+            firstMouseClick = Input.mousePosition; // Save mouse position when user click mouse position
         }
 
+        // If player when click left mouse up
         if (Input.GetMouseButtonUp(0))
         {
-            if(GetDirection() != Vector3.zero)
+            endMouseClick = Input.mousePosition; // Save mouse position when user release mouse click
+            swipeDirection = GetSwipeDirection(); // Caculation swipe direction
+            
+            if(swipeDirection != Direction.NONE)
             {
-                Move(direction,endPosition);
+                targetPosition = GetTargetPosition(swipeDirection); // Caculation tartget position based on swipe direction
+                isMoving = true;
             }
         }
-    }
 
-    private Vector3 GetDirection()
-    {
-        if(Mathf.Abs(endPosition.x - startPosition.x)> Mathf.Abs(endPosition.y - startPosition.y))
+        if (isMoving) 
         {
-            if(Mathf.Abs(endPosition.x - startPosition.x) > threshHold)
-            {
-                if(endPosition.x > startPosition.x)
-                {
-                    direction = Direction.RIGHT;
-                    SetDirection(direction);
-                }else if(endPosition.x < startPosition.x)
-                {
-                    direction = Direction.LEFT;
-                    SetDirection(direction);
-                }
-            }else if(Mathf.Abs(endPosition.x - startPosition.x) < Mathf.Abs(endPosition.y - startPosition.y))
-            {
-                if(Mathf.Abs(endPosition.y - startPosition.y) > threshHold)
-                {
-                    if(endPosition.y > startPosition.y)
-                    {
-                        direction = Direction.FORWARD;
-                        SetDirection(direction);
-                    }
-                    else if(endPosition.y < startPosition.y)
-                    {
-                        direction = Direction.BACK;
-                        SetDirection(direction);
-                    }
-                }
-            }
+            Move(swipeDirection, targetPosition);
         }
-
-        return Vector3.zero;
     }
 
-    private void SetDirection(Direction _direction)
+    // Fucntion to caculate swipe direction
+    private Direction GetSwipeDirection()
     {
+        Vector3 swipeVector = endMouseClick - firstMouseClick;
+        if (swipeVector.magnitude < 50)  // Check if it is a swipe or tap   
+            return Direction.NONE;
+
+        // Check swipe direction
+        // If x > y
+        if (Mathf.Abs(swipeVector.x) > Mathf.Abs(swipeVector.y))
+        {
+            return swipeVector.x > 0 ? Direction.RIGHT : Direction.LEFT; // Return left direction if x > 0 and vice versa
+        }
+        else //if y > 0
+        {
+            return swipeVector.y > 0 ? Direction.FORWARD : Direction.BACK; // Return foward direction if y > 0 and vice versa
+        }
+    }
+
+    // Function to caculate tartget position based on direction
+    private Vector3 GetTargetPosition(Direction _direction)
+    {
+        Vector3 endPosition = transform.position;
+
         switch (_direction)
         {
             case Direction.FORWARD:
-                transform.position = Vector3.forward;
+                endPosition += Vector3.forward; //Forward direction
                 break;
             case Direction.BACK:
-                transform.position = Vector3.back;
-                break;
-            case Direction.LEFT:
-                transform.position = Vector3.left;
+                endPosition += Vector3.back; // Back direction
                 break;
             case Direction.RIGHT:
-                transform.position = Vector3.right;
+                endPosition += Vector3.right; // Right direction
+                break;
+            case Direction.LEFT:
+                endPosition += Vector3.left; // Left direction
+                break;
+            case Direction.NONE: 
+                endPosition += Vector3.zero; // Not moving
                 break;
         }
-        Move(_direction, endPosition);
+
+        return endPosition;
     }
 
+    // Fucntion move object 
     private void Move(Direction _direction, Vector3 _endPosition)
     {
-        transform.position = Vector3.MoveTowards(transform.position, _endPosition, distancePlayer * Time.deltaTime);
-        Debug.Log($"Moving {_direction} to {_endPosition}");
-    }
-}
 
-public enum Direction
-{
-    FORWARD = 0,
-    BACK = 1,
-    LEFT = 2,
-    RIGHT = 3
+        // Handles moving to new position 
+        transform.position = Vector3.MoveTowards(gameObject.transform.position, _endPosition, moveSpeed * Time.deltaTime);
+    
+        //When player move to end position with distance less than 0.1f
+        if(Vector3.Distance(transform.position, _endPosition) < 0.1f)
+        {
+            isMoving = false; // return isMoving false
+        }
+    }
 }
