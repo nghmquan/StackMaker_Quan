@@ -196,7 +196,7 @@ public class Player : MonoBehaviour
 
     private void BrickOnGround(GameObject _gameObject)
     {
-        if (_gameObject != null && moveCount >= 0)
+        if (_gameObject != null /*&& moveCount >= 0*/)
         {
             if (collectedList.Contains(_gameObject) == false)
             {
