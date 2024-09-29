@@ -4,16 +4,17 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Moveable
+  - MoveBrick
+  - Win
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Stack
+  - 
   - Water
   - UI
-  - 
-  - 
+  - Brick
+  - Win
   - 
   - 
   - 
