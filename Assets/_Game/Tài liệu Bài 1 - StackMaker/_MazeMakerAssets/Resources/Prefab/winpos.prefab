@@ -22485,7 +22485,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4157892317022374}
-  - component: {fileID: 8518520474182808203}
+  - component: {fileID: 5987477425901423553}
   m_Layer: 7
   m_Name: winpos
   m_TagString: Untagged
@@ -22576,7 +22576,7 @@ Transform:
   - {fileID: 3142342172709053148}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
---- !u!114 &8518520474182808203
+--- !u!114 &5987477425901423553
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -22585,11 +22585,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1377060364527856}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88e3ebad1b319734dbbba484c8c738ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 7a9620b26f4fb5948ac818e3fdf3bfcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  standFrontChestPostion: {fileID: 1565866299493267694}
-  player: {fileID: 0}
+  chestFront: {fileID: 1565866299493267694}
+  chestOpen: {fileID: 1502762753808250}
+  chestClose: {fileID: 1095323009806971}
 --- !u!1 &1382597685722805
 GameObject:
   m_ObjectHideFlags: 0
@@ -49500,7 +49501,7 @@ GameObject:
   - component: {fileID: 1545180197092200131}
   - component: {fileID: 3423993170878783522}
   m_Layer: 0
-  m_Name: Win Postion
+  m_Name: End Position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
